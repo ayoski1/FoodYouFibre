@@ -2,7 +2,7 @@ name: Food You Fibre test build
 on:
   workflow_dispatch:
   push:
-    branches: [feature/fibre-summary]
+    branches: [main, feature/fibre-summary]
   pull_request:
 permissions:
   contents: read
@@ -17,7 +17,7 @@ jobs:
           java-version: '21'
       - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew :app:testDebugUnitTest :app:assembleDebug --no-daemon
+      - run: ./gradlew --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx2048m -Dfile.encoding=UTF-8" -Pkotlin.compiler.execution.strategy=in-process :app:testDebugUnitTest :app:assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: FoodYouFibre-test-apk
