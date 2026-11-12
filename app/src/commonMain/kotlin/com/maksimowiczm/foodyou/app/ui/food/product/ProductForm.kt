@@ -101,7 +101,7 @@ internal fun ProductForm(
 
                 NutrientsOrder.Carbohydrates ->
                     state.carbohydrates.TextField(
-                        label = stringResource(Res.string.nutriment_carbohydrates),
+                        label = stringResource(Res.string.fibre_carbohydrate_label),
                         modifier = Modifier.padding(horizontalPadding).fillMaxWidth(),
                         required = true,
                     )
@@ -125,6 +125,13 @@ internal fun ProductForm(
             onAutoCalculateToggle = { state.autoCalculateEnergy = it },
             modifier = Modifier.padding(horizontalPadding).fillMaxWidth(),
         )
+        if (state.autoCalculateEnergy) {
+            Text(
+                stringResource(if (state.dietaryFiber.value == null) Res.string.fibre_energy_missing else Res.string.fibre_energy_estimate),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+
 
         order.forEach { field ->
             when (field) {

@@ -54,7 +54,7 @@ internal class GoalsViewModel(
                     observeDiaryMealsUseCase.observe(date),
                     goalsRepository.observeDailyGoals(date),
                 ) { meals, goal ->
-                    val facts = meals.map { it.nutritionFacts }.sum()
+                    val facts = meals.filter { it.entries.isNotEmpty() }.map { it.nutritionFacts }.sum()
 
                     DaySummaryModel(
                         energy = facts.energy.value?.roundToInt() ?: 0,
@@ -65,6 +65,13 @@ internal class GoalsViewModel(
                         carbohydratesGoal = goal[NutritionFactsField.Carbohydrates].roundToInt(),
                         fats = facts.fats.value?.roundToInt() ?: 0,
                         fatsGoal = goal[NutritionFactsField.Fats].roundToInt(),
+                        dietaryFiber = facts.dietaryFiber.value,
+                        dietaryFiberComplete = facts.dietaryFiber.isComplete,
+                        dietaryFiberGoal = goal.map[NutritionFactsField.DietaryFiber] ?: 30.0,
+                        solubleFiber = facts.solubleFiber.value,
+                        insolubleFiber = facts.insolubleFiber.value,
+                        solubleFiberComplete = facts.solubleFiber.isComplete,
+                        insolubleFiberComplete = facts.insolubleFiber.isComplete,
                     )
                 }
             }

@@ -1,0 +1,3 @@
+Name,Brand,Note,Is Liquid,Serving Weight (g),Energy (kcal),Proteins (g),Carbohydrates (g),Fats (g),Dietary Fiber (g),Soluble Fiber (g),Insoluble Fiber (g)
+TEST ONLY Fibre known 185 kcal,Fibre fork check,Fictional test food. 1 Serving = 100 g. Expected P10 C20 F5 fibre10 soluble4 insoluble6 and 185 kcal. Delete after testing.,false,100,185,10,20,5,10,4,6
+TEST ONLY Fibre unknown 165 kcal,Fibre fork check,"Fictional test food. Fibre unknown. With one serving of both test foods the diary should show 350 kcal, carbs40g, fibre10g incomplete. Delete after testing.",false,100,165,10,20,5,,,

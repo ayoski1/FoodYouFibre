@@ -78,6 +78,4 @@ sealed interface NutrientValue {
 }
 
 fun List<NutrientValue>.sum(): NutrientValue =
-    this.fold<NutrientValue, NutrientValue>(NutrientValue.Complete(0.0)) { acc, nutrientValue ->
-        acc + nutrientValue
-    }
+    this.reduceOrNull { acc, nutrientValue -> acc + nutrientValue } ?: NutrientValue.Complete(0.0)

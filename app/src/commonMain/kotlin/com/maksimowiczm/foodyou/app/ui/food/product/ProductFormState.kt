@@ -25,12 +25,8 @@ import com.maksimowiczm.foodyou.common.domain.measurement.Measurement
 import com.maksimowiczm.foodyou.food.domain.entity.Product
 import com.maksimowiczm.foodyou.food.domain.entity.RemoteProduct
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun rememberProductFormState(product: Product? = null): ProductFormState {
@@ -109,6 +105,7 @@ internal fun rememberProductFormState(product: Product? = null): ProductFormStat
     val proteins = rememberRequiredFormField(product?.nutritionFacts?.proteins?.value)
     val carbohydrates = rememberRequiredFormField(product?.nutritionFacts?.carbohydrates?.value)
     val fats = rememberRequiredFormField(product?.nutritionFacts?.fats?.value)
+    val dietaryFiber = rememberNotRequiredFormField(product?.nutritionFacts?.dietaryFiber?.value)
     val energyFormatter = LocalEnergyFormatter.current
     val energy =
         rememberFormField(
@@ -143,95 +140,19 @@ internal fun rememberProductFormState(product: Product? = null): ProductFormStat
         )
 
     val autoCalculateEnergyState =
-        rememberSaveable(product) {
-            if (product == null) {
-                mutableStateOf(true)
-            } else {
-                val energy = product.nutritionFacts.energy.value
-                val proteins = product.nutritionFacts.proteins.value
-                val carbohydrates = product.nutritionFacts.carbohydrates.value
-                val fats = product.nutritionFacts.fats.value
+        rememberSaveable(product) { mutableStateOf(product?.nutritionFacts?.energy?.value == null) }
 
-                val initialState =
-                    if (
-                        energy == null || proteins == null || carbohydrates == null || fats == null
-                    ) {
-                        true
-                    } else {
-                        NutrientsHelper.calculateEnergy(
-                            proteins = proteins,
-                            carbohydrates = carbohydrates,
-                            fats = fats,
-                        ) == energy
-                    }
-
-                mutableStateOf(initialState)
-            }
-        }
-
-    LaunchedEffect(autoCalculateEnergyState, proteins, carbohydrates, fats) {
-        launch {
-            snapshotFlow { autoCalculateEnergyState.value }
-                .drop(1)
-                .filter { it }
-                .collectLatest {
-                    val proteinsValue = proteins.value
-                    val carbohydratesValue = carbohydrates.value
-                    val fatsValue = fats.value
-
-                    if (proteinsValue != null && carbohydratesValue != null && fatsValue != null) {
-                        val kcal =
-                            NutrientsHelper.calculateEnergy(
-                                proteins = proteinsValue,
-                                carbohydrates = carbohydratesValue,
-                                fats = fatsValue,
-                            )
-
-                        val energyValue = energyFormatter.fromKcal(kcal.toDouble())
-                        val text = energyValue.formatClipZeros()
-                        energy.textFieldState.setTextAndPlaceCursorAtEnd(text)
-                    }
-                }
-        }
-
-        launch {
-            val caloriesFlow =
-                combine(
-                        snapshotFlow { proteins.value },
-                        snapshotFlow { carbohydrates.value },
-                        snapshotFlow { fats.value },
-                    ) {
-                        it
-                    }
-                    .drop(1)
-                    .mapNotNull {
-                        val (proteins, carbohydrates, fats) = it
-                        if (proteins == null || carbohydrates == null || fats == null) {
-                            return@mapNotNull null
-                        }
-
-                        NutrientsHelper.calculateEnergy(
-                            proteins = proteins,
-                            carbohydrates = carbohydrates,
-                            fats = fats,
-                        )
-                    }
-
-            combine(snapshotFlow { autoCalculateEnergyState.value }, caloriesFlow) {
-                    autoCalculateEnergy,
-                    calories ->
-                    if (!autoCalculateEnergy) {
-                        return@combine null
-                    }
-
-                    calories
-                }
-                .filterNotNull()
-                .collectLatest { kcal ->
-                    val energyValue = energyFormatter.fromKcal(kcal.toDouble())
-                    val text = energyValue.formatClipZeros()
-                    energy.textFieldState.setTextAndPlaceCursorAtEnd(text)
-                }
+    LaunchedEffect(autoCalculateEnergyState, proteins, carbohydrates, fats, dietaryFiber, energyFormatter) {
+        snapshotFlow {
+            if (!autoCalculateEnergyState.value) return@snapshotFlow null
+            val protein = proteins.value ?: return@snapshotFlow null
+            val carbohydrate = carbohydrates.value ?: return@snapshotFlow null
+            val fat = fats.value ?: return@snapshotFlow null
+            NutrientsHelper.calculateEnergy(protein, carbohydrate, fat, dietaryFiber.value ?: 0f)
+        }.filterNotNull().collectLatest { kcal ->
+            energy.textFieldState.setTextAndPlaceCursorAtEnd(
+                energyFormatter.fromKcal(kcal.toDouble()).formatClipZeros()
+            )
         }
     }
 
@@ -247,7 +168,6 @@ internal fun rememberProductFormState(product: Product? = null): ProductFormStat
     val sugars = rememberNotRequiredFormField(product?.nutritionFacts?.sugars?.value)
     val addedSugars = rememberNotRequiredFormField(product?.nutritionFacts?.addedSugars?.value)
     val salt = rememberNotRequiredFormField(product?.nutritionFacts?.salt?.value)
-    val dietaryFiber = rememberNotRequiredFormField(product?.nutritionFacts?.dietaryFiber?.value)
     val solubleFiber = rememberNotRequiredFormField(product?.nutritionFacts?.solubleFiber?.value)
     val insolubleFiber =
         rememberNotRequiredFormField(product?.nutritionFacts?.insolubleFiber?.value)
@@ -661,6 +581,7 @@ internal fun rememberProductFormState(product: RemoteProduct): ProductFormState 
     val proteins = rememberRequiredFormField(product.nutritionFacts?.proteins)
     val carbohydrates = rememberRequiredFormField(product.nutritionFacts?.carbohydrates)
     val fats = rememberRequiredFormField(product.nutritionFacts?.fats)
+    val dietaryFiber = rememberNotRequiredFormField(product.nutritionFacts?.dietaryFiber)
     val energyFormatter = LocalEnergyFormatter.current
     val energy =
         rememberFormField(
@@ -693,89 +614,19 @@ internal fun rememberProductFormState(product: RemoteProduct): ProductFormState 
         )
 
     val autoCalculateEnergyState =
-        rememberSaveable(product) {
-            val energy = product.nutritionFacts?.energy
-            val proteins = product.nutritionFacts?.proteins
-            val carbohydrates = product.nutritionFacts?.carbohydrates
-            val fats = product.nutritionFacts?.fats
+        rememberSaveable(product) { mutableStateOf(product.nutritionFacts?.energy == null) }
 
-            val initialState =
-                if (energy == null || proteins == null || carbohydrates == null || fats == null) {
-                    true
-                } else {
-                    NutrientsHelper.calculateEnergy(
-                        proteins = proteins,
-                        carbohydrates = carbohydrates,
-                        fats = fats,
-                    ) == energy
-                }
-
-            mutableStateOf(initialState)
-        }
-
-    LaunchedEffect(autoCalculateEnergyState, proteins, carbohydrates, fats) {
-        launch {
-            snapshotFlow { autoCalculateEnergyState.value }
-                .drop(1)
-                .filter { it }
-                .collectLatest {
-                    val proteinsValue = proteins.value
-                    val carbohydratesValue = carbohydrates.value
-                    val fatsValue = fats.value
-
-                    if (proteinsValue != null && carbohydratesValue != null && fatsValue != null) {
-                        val kcal =
-                            NutrientsHelper.calculateEnergy(
-                                proteins = proteinsValue,
-                                carbohydrates = carbohydratesValue,
-                                fats = fatsValue,
-                            )
-
-                        val energyValue = energyFormatter.fromKcal(kcal.toDouble())
-                        val text = energyValue.formatClipZeros()
-                        energy.textFieldState.setTextAndPlaceCursorAtEnd(text)
-                    }
-                }
-        }
-
-        launch {
-            val caloriesFlow =
-                combine(
-                        snapshotFlow { proteins.value },
-                        snapshotFlow { carbohydrates.value },
-                        snapshotFlow { fats.value },
-                    ) {
-                        it
-                    }
-                    .drop(1)
-                    .mapNotNull {
-                        val (proteins, carbohydrates, fats) = it
-                        if (proteins == null || carbohydrates == null || fats == null) {
-                            return@mapNotNull null
-                        }
-
-                        NutrientsHelper.calculateEnergy(
-                            proteins = proteins,
-                            carbohydrates = carbohydrates,
-                            fats = fats,
-                        )
-                    }
-
-            combine(snapshotFlow { autoCalculateEnergyState.value }, caloriesFlow) {
-                    autoCalculateEnergy,
-                    calories ->
-                    if (!autoCalculateEnergy) {
-                        return@combine null
-                    }
-
-                    calories
-                }
-                .filterNotNull()
-                .collectLatest { kcal ->
-                    val energyValue = energyFormatter.fromKcal(kcal.toDouble())
-                    val text = energyValue.formatClipZeros()
-                    energy.textFieldState.setTextAndPlaceCursorAtEnd(text)
-                }
+    LaunchedEffect(autoCalculateEnergyState, proteins, carbohydrates, fats, dietaryFiber, energyFormatter) {
+        snapshotFlow {
+            if (!autoCalculateEnergyState.value) return@snapshotFlow null
+            val protein = proteins.value ?: return@snapshotFlow null
+            val carbohydrate = carbohydrates.value ?: return@snapshotFlow null
+            val fat = fats.value ?: return@snapshotFlow null
+            NutrientsHelper.calculateEnergy(protein, carbohydrate, fat, dietaryFiber.value ?: 0f)
+        }.filterNotNull().collectLatest { kcal ->
+            energy.textFieldState.setTextAndPlaceCursorAtEnd(
+                energyFormatter.fromKcal(kcal.toDouble()).formatClipZeros()
+            )
         }
     }
 
@@ -791,7 +642,6 @@ internal fun rememberProductFormState(product: RemoteProduct): ProductFormState 
     val sugars = rememberNotRequiredFormField(product.nutritionFacts?.sugars)
     val addedSugars = rememberNotRequiredFormField(product.nutritionFacts?.addedSugars)
     val salt = rememberNotRequiredFormField(product.nutritionFacts?.salt)
-    val dietaryFiber = rememberNotRequiredFormField(product.nutritionFacts?.dietaryFiber)
     val solubleFiber = rememberNotRequiredFormField(product.nutritionFacts?.solubleFiber)
     val insolubleFiber = rememberNotRequiredFormField(product.nutritionFacts?.insolubleFiber)
     val cholesterol =

@@ -19,7 +19,7 @@ buildConfig {
     packageName("com.maksimowiczm.foodyou.app")
     className("BuildConfig")
 
-    val versionName = libs.versions.version.name.get()
+    val versionName = libs.versions.version.name.get() + "-fibre.1"
     buildConfigField("String", "VERSION_NAME", "\"$versionName\"")
 }
 
@@ -121,15 +121,16 @@ kotlin {
 }
 
 android {
+    buildToolsVersion = "36.0.0"
     namespace = "com.maksimowiczm.foodyou"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.maksimowiczm.foodyou"
+        applicationId = "com.maksimowiczm.foodyou.fibre"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = libs.versions.android.versionCode.get().toInt()
-        versionName = libs.versions.version.name.get()
+        versionName = libs.versions.version.name.get() + "-fibre.1"
 
         manifestPlaceholders["applicationIcon"] = "@mipmap/ic_launcher"
         manifestPlaceholders["applicationRoundIcon"] = "@mipmap/ic_launcher_round"

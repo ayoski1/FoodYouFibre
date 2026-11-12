@@ -19,7 +19,10 @@ internal class USDAMapper {
     fun toRemoteProduct(food: AbridgedFoodItem): RemoteProduct {
         return with(food) {
             val proteins = getNutrient(foodNutrients, USDANutrientId.PROTEIN)?.normalize()
-            val carbohydrates = getNutrient(foodNutrients, USDANutrientId.CARBOHYDRATE)?.normalize()
+            val dietaryFiber = getNutrient(foodNutrients, USDANutrientId.DIETARY_FIBER)?.normalize()
+            val carbohydrates = NutrientsHelper.availableCarbohydrates(
+                getNutrient(foodNutrients, USDANutrientId.CARBOHYDRATE)?.normalize(), dietaryFiber
+            )
             val fats = getNutrient(foodNutrients, USDANutrientId.TOTAL_FAT)?.normalize()
 
             // Try to get energy, or calculate it if we have macros
@@ -31,6 +34,7 @@ internal class USDAMapper {
                             proteins = proteins,
                             carbohydrates = carbohydrates,
                             fats = fats,
+                            dietaryFiber = dietaryFiber ?: 0.0,
                         )
                     } else {
                         null
@@ -59,7 +63,10 @@ internal class USDAMapper {
     fun toRemoteProduct(food: SearchResultFood): RemoteProduct {
         return with(food) {
             val proteins = getNutrient(foodNutrients, USDANutrientId.PROTEIN)?.normalize()
-            val carbohydrates = getNutrient(foodNutrients, USDANutrientId.CARBOHYDRATE)?.normalize()
+            val dietaryFiber = getNutrient(foodNutrients, USDANutrientId.DIETARY_FIBER)?.normalize()
+            val carbohydrates = NutrientsHelper.availableCarbohydrates(
+                getNutrient(foodNutrients, USDANutrientId.CARBOHYDRATE)?.normalize(), dietaryFiber
+            )
             val fats = getNutrient(foodNutrients, USDANutrientId.TOTAL_FAT)?.normalize()
 
             // Try to get energy, or calculate it if we have macros
@@ -71,6 +78,7 @@ internal class USDAMapper {
                             proteins = proteins,
                             carbohydrates = carbohydrates,
                             fats = fats,
+                            dietaryFiber = dietaryFiber ?: 0.0,
                         )
                     } else {
                         null

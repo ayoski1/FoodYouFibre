@@ -1,3 +1,15 @@
+# Food You Fibre — test fork
+
+A small fork of Food You **3.4.9**, with a compact fibre summary and fibre-aware automatic calorie estimates. It installs separately as **Food You Fibre** (`com.maksimowiczm.foodyou.fibre`). See [FIBRE.md](FIBRE.md) for implemented behaviour, known limits and phone acceptance checks.
+
+Validation: the Android app compiled and an APK was packaged; 14 accounting checks and 40 CSV tests passed against the compiled classes. Phone rendering and diary-copy restore remain unverified. No real diary data is included in this repository.
+
+The delivered test APK uses signing-certificate SHA-256 `e233cb5ad81b0f79d13d7187738bf4010e7c3fd1b0ebe3f8ba850d517e3b54d1`. Private signing material is kept outside this repository. GitHub Actions test builds use separate test signing until the retained key is configured securely.
+
+The original project's README follows. Its download links and certificate identify the upstream app, not this test fork.
+
+---
+
 [![F-Droid](https://img.shields.io/f-droid/v/com.maksimowiczm.foodyou?color=b4eb12&label=F-Droid&logo=fdroid&logoColor=1f78d2)](https://f-droid.org/en/packages/com.maksimowiczm.foodyou)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/maksimowiczm/FoodYou?color=black&label=Stable&logo=github)](https://github.com/maksimowiczm/FoodYou/releases/latest/)
 [![GitHub all releases](https://img.shields.io/github/downloads/maksimowiczm/FoodYou/total?label=Downloads&logo=github)](https://github.com/maksimowiczm/FoodYou/releases/)

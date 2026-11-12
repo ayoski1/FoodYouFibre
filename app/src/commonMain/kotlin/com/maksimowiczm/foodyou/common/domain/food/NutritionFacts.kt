@@ -329,7 +329,7 @@ data class NutritionFacts(
 }
 
 fun Iterable<NutritionFacts>.sum(): NutritionFacts =
-    this@sum.fold(NutritionFacts.Empty) { acc, nutrients -> acc + nutrients }
+    this@sum.reduceOrNull { acc, nutrients -> acc + nutrients } ?: NutritionFacts.Empty
 
 operator fun NutritionFacts.get(field: NutritionFactsField): NutrientValue =
     when (field) {

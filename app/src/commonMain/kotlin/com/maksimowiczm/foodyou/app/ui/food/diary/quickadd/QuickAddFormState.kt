@@ -92,18 +92,7 @@ internal fun rememberQuickAddFormState(
 
     val autoCalculateEnergyState =
         rememberSaveable(proteins, carbohydrates, fats, energy) {
-            val initialState =
-                if (energy == null || proteins == null || carbohydrates == null || fats == null) {
-                    true
-                } else {
-                    NutrientsHelper.calculateEnergy(
-                        proteins = proteins,
-                        carbohydrates = carbohydrates,
-                        fats = fats,
-                    ) == energy
-                }
-
-            mutableStateOf(initialState)
+            mutableStateOf(energy == null)
         }
 
     LaunchedEffect(

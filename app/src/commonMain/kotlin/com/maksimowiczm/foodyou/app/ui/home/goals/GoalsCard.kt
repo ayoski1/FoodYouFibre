@@ -5,6 +5,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import com.maksimowiczm.foodyou.common.compose.utility.formatClipZeros
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -75,6 +79,7 @@ internal fun GoalsCard(
             carbohydratesGoal = model.carbohydratesGoal,
             fats = model.fats,
             fatsGoal = model.fatsGoal,
+            fibreModel = model,
             onClick = { onClick(homeState.selectedDate.toEpochDays()) },
             onLongClick = onLongClick,
             modifier = modifier,
@@ -96,6 +101,7 @@ internal fun GoalsCard(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
+    fibreModel: DaySummaryModel? = null,
 ) {
     val proteinsPercentage =
         animateFloatAsState(
@@ -126,6 +132,7 @@ internal fun GoalsCard(
                 proteinsPercentage = proteinsPercentage,
                 carbsPercentage = carbsPercentage,
                 fatsPercentage = fatsPercentage,
+                fibreModel = fibreModel,
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -159,6 +166,7 @@ private fun GoalsCardContent(
     proteinsPercentage: Float,
     carbsPercentage: Float,
     fatsPercentage: Float,
+    fibreModel: DaySummaryModel?,
     modifier: Modifier = Modifier,
 ) {
     val nutrientsPalette = LocalNutrientsPalette.current
@@ -193,10 +201,10 @@ private fun GoalsCardContent(
 
     val left = remember(energy, energyGoal) { energyGoal - energy }
 
-    Row(
+    FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(text = caloriesString, style = typography.headlineLargeEmphasized)
@@ -225,40 +233,71 @@ private fun GoalsCardContent(
             }
         }
 
-        Row(modifier = Modifier.height(64.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            nutrientsOrder.forEach { field ->
-                when (field) {
-                    NutrientsOrder.Proteins ->
-                        MacroBar(
-                            progress = proteinsPercentage,
-                            containerColor =
-                                nutrientsPalette.proteinsOnSurfaceContainer.copy(alpha = .25f),
-                            barColor = nutrientsPalette.proteinsOnSurfaceContainer,
-                        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(modifier = Modifier.height(64.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                nutrientsOrder.forEach { field ->
+                    when (field) {
+                        NutrientsOrder.Proteins ->
+                            MacroBar(
+                                progress = proteinsPercentage,
+                                containerColor =
+                                    nutrientsPalette.proteinsOnSurfaceContainer.copy(alpha = .25f),
+                                barColor = nutrientsPalette.proteinsOnSurfaceContainer,
+                            )
 
-                    NutrientsOrder.Fats ->
-                        MacroBar(
-                            progress = fatsPercentage,
-                            containerColor =
-                                nutrientsPalette.fatsOnSurfaceContainer.copy(alpha = .25f),
-                            barColor = nutrientsPalette.fatsOnSurfaceContainer,
-                        )
+                        NutrientsOrder.Fats ->
+                            MacroBar(
+                                progress = fatsPercentage,
+                                containerColor =
+                                    nutrientsPalette.fatsOnSurfaceContainer.copy(alpha = .25f),
+                                barColor = nutrientsPalette.fatsOnSurfaceContainer,
+                            )
 
-                    NutrientsOrder.Carbohydrates ->
-                        MacroBar(
-                            progress = carbsPercentage,
-                            containerColor =
-                                nutrientsPalette.carbohydratesOnSurfaceContainer.copy(alpha = .25f),
-                            barColor = nutrientsPalette.carbohydratesOnSurfaceContainer,
-                        )
+                        NutrientsOrder.Carbohydrates ->
+                            MacroBar(
+                                progress = carbsPercentage,
+                                containerColor =
+                                    nutrientsPalette.carbohydratesOnSurfaceContainer.copy(alpha = .25f),
+                                barColor = nutrientsPalette.carbohydratesOnSurfaceContainer,
+                            )
 
-                    NutrientsOrder.Other,
-                    NutrientsOrder.Vitamins,
-                    NutrientsOrder.Minerals -> Unit
+                        NutrientsOrder.Other,
+                        NutrientsOrder.Vitamins,
+                        NutrientsOrder.Minerals -> Unit
+                    }
                 }
             }
+            fibreModel?.let { FibreSummary(it) }
         }
     }
+}
+
+@Composable
+private fun FibreSummary(model: DaySummaryModel) {
+    var showDetails by remember { mutableStateOf(false) }
+    fun amount(value: Double?, complete: Boolean): String =
+        value?.let { it.formatClipZeros() + " g" + if (complete) "" else "+" }
+            ?: "—"
+    TextButton(onClick = { showDetails = true }) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(stringResource(Res.string.fibre_summary_title), style = MaterialTheme.typography.labelSmall)
+            Text(amount(model.dietaryFiber, model.dietaryFiberComplete), style = MaterialTheme.typography.labelLarge)
+            Text("/ " + model.dietaryFiberGoal.formatClipZeros() + " g", style = MaterialTheme.typography.labelSmall)
+        }
+    }
+    if (showDetails) AlertDialog(
+        onDismissRequest = { showDetails = false },
+        title = { Text(stringResource(Res.string.fibre_summary_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.fibre_total) + ": " + amount(model.dietaryFiber, model.dietaryFiberComplete))
+                Text(stringResource(Res.string.fibre_soluble) + ": " + amount(model.solubleFiber, model.solubleFiberComplete))
+                Text(stringResource(Res.string.fibre_insoluble) + ": " + amount(model.insolubleFiber, model.insolubleFiberComplete))
+                Text(stringResource(Res.string.fibre_summary_explanation))
+            }
+        },
+        confirmButton = { TextButton(onClick = { showDetails = false }) { Text(stringResource(Res.string.fibre_close)) } },
+    )
 }
 
 @Composable

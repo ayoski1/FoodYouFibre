@@ -56,7 +56,7 @@ internal fun QuickAddForm(state: QuickAddFormState, modifier: Modifier = Modifie
                     )
                 NutrientsOrder.Carbohydrates ->
                     state.carbohydrates.TextField(
-                        label = stringResource(Res.string.nutriment_carbohydrates),
+                        label = stringResource(Res.string.fibre_carbohydrate_label),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 else -> Unit
@@ -71,6 +71,8 @@ internal fun QuickAddForm(state: QuickAddFormState, modifier: Modifier = Modifie
                 val error = state.energy.error
                 if (error != null) {
                     Text(error.stringResource())
+                } else if (state.autoCalculateEnergy) {
+                    Text(stringResource(Res.string.fibre_energy_missing))
                 }
             },
             suffix = { Text(energyFormatter.suffix()) },

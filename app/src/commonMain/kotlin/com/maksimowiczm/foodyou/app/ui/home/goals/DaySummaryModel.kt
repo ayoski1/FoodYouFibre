@@ -12,4 +12,11 @@ internal data class DaySummaryModel(
     val carbohydratesGoal: Int,
     val fats: Int,
     val fatsGoal: Int,
+    val dietaryFiber: Double? = null,
+    val dietaryFiberComplete: Boolean = false,
+    val dietaryFiberGoal: Double = 30.0,
+    val solubleFiber: Double? = null,
+    val insolubleFiber: Double? = null,
+    val solubleFiberComplete: Boolean = false,
+    val insolubleFiberComplete: Boolean = false,
 )
