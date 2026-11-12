@@ -2,8 +2,14 @@ name: Food You Fibre test build
 on:
   workflow_dispatch:
   push:
-    branches: [main, feature/fibre-summary]
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
 permissions:
   contents: read
 jobs:
