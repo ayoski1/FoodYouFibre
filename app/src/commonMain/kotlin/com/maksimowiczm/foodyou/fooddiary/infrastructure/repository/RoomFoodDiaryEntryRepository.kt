@@ -16,6 +16,7 @@ import com.maksimowiczm.foodyou.fooddiary.domain.entity.DiaryFood
 import com.maksimowiczm.foodyou.fooddiary.domain.entity.DiaryFoodProduct
 import com.maksimowiczm.foodyou.fooddiary.domain.entity.DiaryFoodRecipe
 import com.maksimowiczm.foodyou.fooddiary.domain.entity.DiaryFoodRecipeIngredient
+import com.maksimowiczm.foodyou.fooddiary.domain.entity.EatingTime
 import com.maksimowiczm.foodyou.fooddiary.domain.entity.FoodDiaryEntry
 import com.maksimowiczm.foodyou.fooddiary.domain.entity.FoodDiaryEntryId
 import com.maksimowiczm.foodyou.fooddiary.domain.repository.FoodDiaryEntryRepository
@@ -60,6 +61,7 @@ internal class RoomFoodDiaryEntryRepository(
                     food = food,
                     createdAt = createdAt,
                     updatedAt = updatedAt,
+                    eatingTime = entity.eatingTime,
                 )
             }
         }
@@ -91,6 +93,7 @@ internal class RoomFoodDiaryEntryRepository(
                                 food = it,
                                 createdAt = createdAt,
                                 updatedAt = updatedAt,
+                                eatingTime = entity.eatingTime,
                             )
                         }
                     }
@@ -104,6 +107,7 @@ internal class RoomFoodDiaryEntryRepository(
         date: LocalDate,
         food: DiaryFood,
         createdAt: LocalDateTime,
+        eatingTime: EatingTime?,
     ): FoodDiaryEntryId =
         database.immediateTransaction {
             val recipeId = run {
@@ -138,6 +142,7 @@ internal class RoomFoodDiaryEntryRepository(
                     quantity = measurement.rawValue,
                     createdAt = createdAt,
                     updatedAt = createdAt,
+                    eatingTime = eatingTime,
                 )
 
             dao.insertMeasurement(entity).toFoodDiaryEntryId()
@@ -186,6 +191,7 @@ internal class RoomFoodDiaryEntryRepository(
                     recipeId = newRecipeId,
                     measurement = entry.measurement.type,
                     quantity = entry.measurement.rawValue,
+                    eatingTime = entry.eatingTime,
                     updatedAt =
                         entry.updatedAt.toInstant(TimeZone.currentSystemDefault()).epochSeconds,
                 )

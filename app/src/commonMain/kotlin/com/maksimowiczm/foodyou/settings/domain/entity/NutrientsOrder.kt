@@ -10,6 +10,6 @@ enum class NutrientsOrder {
 
     companion object {
         val defaultOrder: List<NutrientsOrder>
-            get() = listOf(Proteins, Fats, Carbohydrates, Other, Vitamins, Minerals)
+            get() = listOf(Proteins, Carbohydrates, Fats, Other, Vitamins, Minerals)
     }
 }

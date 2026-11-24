@@ -2,6 +2,7 @@ package com.maksimowiczm.foodyou.fooddiary.domain.repository
 
 import com.maksimowiczm.foodyou.common.domain.measurement.Measurement
 import com.maksimowiczm.foodyou.fooddiary.domain.entity.DiaryFood
+import com.maksimowiczm.foodyou.fooddiary.domain.entity.EatingTime
 import com.maksimowiczm.foodyou.fooddiary.domain.entity.FoodDiaryEntry
 import com.maksimowiczm.foodyou.fooddiary.domain.entity.FoodDiaryEntryId
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +20,7 @@ interface FoodDiaryEntryRepository {
         date: LocalDate,
         food: DiaryFood,
         createdAt: LocalDateTime,
+        eatingTime: EatingTime? = null,
     ): FoodDiaryEntryId
 
     suspend fun update(entry: FoodDiaryEntry)

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.maksimowiczm.foodyou.common.domain.date.DateProvider
 import com.maksimowiczm.foodyou.common.domain.food.NutrientValue.Companion.toNutrientValue
 import com.maksimowiczm.foodyou.common.domain.food.NutritionFacts
+import com.maksimowiczm.foodyou.fooddiary.domain.entity.EatingTime
 import com.maksimowiczm.foodyou.fooddiary.domain.repository.ManualDiaryEntryRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -27,6 +28,7 @@ internal class CreateQuickAddViewModel(
         proteins: Double,
         carbohydrates: Double,
         fats: Double,
+        eatingTime: EatingTime,
     ) {
         viewModelScope.launch {
             manualDiaryEntryRepository.insert(
@@ -41,6 +43,7 @@ internal class CreateQuickAddViewModel(
                         fats = fats.toNutrientValue(),
                     ),
                 createdAt = dateProvider.now(),
+                eatingTime = eatingTime,
             )
 
             eventChannel.send(QuickAddUiEvent.Saved)

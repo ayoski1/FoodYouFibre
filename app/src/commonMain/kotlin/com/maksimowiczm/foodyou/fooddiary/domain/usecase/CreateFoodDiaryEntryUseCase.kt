@@ -8,6 +8,7 @@ import com.maksimowiczm.foodyou.common.log.logAndReturnFailure
 import com.maksimowiczm.foodyou.common.result.Ok
 import com.maksimowiczm.foodyou.common.result.Result
 import com.maksimowiczm.foodyou.fooddiary.domain.entity.DiaryFood
+import com.maksimowiczm.foodyou.fooddiary.domain.entity.EatingTime
 import com.maksimowiczm.foodyou.fooddiary.domain.entity.FoodDiaryEntryId
 import com.maksimowiczm.foodyou.fooddiary.domain.repository.FoodDiaryEntryRepository
 import com.maksimowiczm.foodyou.fooddiary.domain.repository.MealRepository
@@ -32,6 +33,7 @@ class CreateFoodDiaryEntryUseCase(
         mealId: Long,
         date: LocalDate,
         food: DiaryFood,
+        eatingTime: EatingTime? = null,
     ): Result<FoodDiaryEntryId, CreateFoodDiaryEntryError> {
         when (measurement) {
             is Measurement.Gram,
@@ -97,6 +99,7 @@ class CreateFoodDiaryEntryUseCase(
                     date = date,
                     food = food,
                     createdAt = now,
+                    eatingTime = eatingTime,
                 )
 
             Ok(entryId)

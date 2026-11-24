@@ -17,6 +17,7 @@ import com.maksimowiczm.foodyou.food.domain.repository.FoodHistoryRepository
 import com.maksimowiczm.foodyou.food.domain.usecase.DeleteFoodUseCase
 import com.maksimowiczm.foodyou.food.domain.usecase.ObserveFoodUseCase
 import com.maksimowiczm.foodyou.food.domain.usecase.ObserveMeasurementSuggestionsUseCase
+import com.maksimowiczm.foodyou.fooddiary.domain.entity.EatingTime
 import com.maksimowiczm.foodyou.fooddiary.domain.event.FoodDiaryEntryCreatedEvent
 import com.maksimowiczm.foodyou.fooddiary.domain.repository.MealRepository
 import com.maksimowiczm.foodyou.fooddiary.domain.usecase.CreateFoodDiaryEntryUseCase
@@ -147,7 +148,7 @@ internal class AddEntryViewModel(
         }
     }
 
-    fun addEntry(measurement: Measurement, mealId: Long, date: LocalDate) {
+    fun addEntry(measurement: Measurement, mealId: Long, date: LocalDate, eatingTime: EatingTime) {
         viewModelScope.launch {
             val food = domainFood.firstOrNull()
             if (food == null) {
@@ -161,6 +162,7 @@ internal class AddEntryViewModel(
                     mealId = mealId,
                     date = date,
                     food = diaryFood,
+                    eatingTime = eatingTime,
                 )
                 .onSuccess {
                     eventBus.publish(
@@ -179,7 +181,7 @@ internal class AddEntryViewModel(
         }
     }
 
-    fun unpack(measurement: Measurement, mealId: Long, date: LocalDate) {
+    fun unpack(measurement: Measurement, mealId: Long, date: LocalDate, eatingTime: EatingTime) {
         viewModelScope.launch {
             val food = domainFood.firstOrNull()
             if (food !is Recipe) {
@@ -196,6 +198,7 @@ internal class AddEntryViewModel(
                         mealId = mealId,
                         date = date,
                         food = diaryFood,
+                        eatingTime = eatingTime,
                     )
                     .onError {
                         // Explode

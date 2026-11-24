@@ -27,6 +27,7 @@ data class FoodDiaryEntry(
     val food: DiaryFood,
     override val createdAt: LocalDateTime,
     override val updatedAt: LocalDateTime,
+    override val eatingTime: EatingTime? = null,
 ) : DiaryEntry {
     override val name: String = food.name
 

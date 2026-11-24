@@ -26,4 +26,5 @@ data class ManualDiaryEntry(
     override val nutritionFacts: NutritionFacts,
     override val createdAt: LocalDateTime,
     override val updatedAt: LocalDateTime,
+    override val eatingTime: EatingTime? = null,
 ) : DiaryEntry

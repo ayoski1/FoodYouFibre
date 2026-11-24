@@ -3,6 +3,7 @@ package com.maksimowiczm.foodyou.fooddiary.infrastructure.repository
 import com.maksimowiczm.foodyou.common.domain.food.NutritionFacts
 import com.maksimowiczm.foodyou.common.infrastructure.room.toEntityNutrients
 import com.maksimowiczm.foodyou.common.infrastructure.room.toNutritionFacts
+import com.maksimowiczm.foodyou.fooddiary.domain.entity.EatingTime
 import com.maksimowiczm.foodyou.fooddiary.domain.entity.ManualDiaryEntry
 import com.maksimowiczm.foodyou.fooddiary.domain.entity.ManualDiaryEntryId
 import com.maksimowiczm.foodyou.fooddiary.domain.repository.ManualDiaryEntryRepository
@@ -33,6 +34,7 @@ internal class RoomManualDiaryEntryRepository(private val dao: ManualDiaryEntryD
         date: LocalDate,
         nutritionFacts: NutritionFacts,
         createdAt: LocalDateTime,
+        eatingTime: EatingTime?,
     ): ManualDiaryEntryId {
         val entry =
             ManualDiaryEntry(
@@ -43,6 +45,7 @@ internal class RoomManualDiaryEntryRepository(private val dao: ManualDiaryEntryD
                 nutritionFacts = nutritionFacts,
                 createdAt = createdAt,
                 updatedAt = createdAt,
+                eatingTime = eatingTime,
             )
         val id = dao.insert(entry.toEntity())
         return ManualDiaryEntryId(id)
@@ -64,6 +67,7 @@ private fun ManualDiaryEntryEntity.toModel(): ManualDiaryEntry =
         createdAt =
             Instant.fromEpochSeconds(createdEpochSeconds)
                 .toLocalDateTime(TimeZone.currentSystemDefault()),
+        eatingTime = eatingTime,
         updatedAt =
             Instant.fromEpochSeconds(updatedEpochSeconds)
                 .toLocalDateTime(TimeZone.currentSystemDefault()),
@@ -81,6 +85,7 @@ private fun ManualDiaryEntry.toEntity(): ManualDiaryEntryEntity {
         vitamins = vitamins,
         minerals = minerals,
         createdEpochSeconds = createdAt.toInstant(TimeZone.currentSystemDefault()).epochSeconds,
+        eatingTime = eatingTime,
         updatedEpochSeconds = updatedAt.toInstant(TimeZone.currentSystemDefault()).epochSeconds,
     )
 }

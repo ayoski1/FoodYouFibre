@@ -1,10 +1,12 @@
 package com.maksimowiczm.foodyou.fooddiary.infrastructure.room
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.maksimowiczm.foodyou.common.domain.measurement.MeasurementType
+import com.maksimowiczm.foodyou.fooddiary.domain.entity.EatingTime
 
 @Entity(
     tableName = "Measurement",
@@ -34,4 +36,5 @@ data class MeasurementEntity(
     val createdAt: Long,
     /** Epoch seconds */
     val updatedAt: Long,
+    @Embedded(prefix = "eaten_") val eatingTime: EatingTime? = null,
 )

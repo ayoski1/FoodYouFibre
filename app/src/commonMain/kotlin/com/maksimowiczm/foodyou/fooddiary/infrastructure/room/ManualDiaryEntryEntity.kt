@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
 import com.maksimowiczm.foodyou.common.infrastructure.room.Minerals
 import com.maksimowiczm.foodyou.common.infrastructure.room.Nutrients
 import com.maksimowiczm.foodyou.common.infrastructure.room.Vitamins
+import com.maksimowiczm.foodyou.fooddiary.domain.entity.EatingTime
 
 @Entity(
     tableName = "ManualDiaryEntry",
@@ -32,4 +33,5 @@ data class ManualDiaryEntryEntity(
     @Embedded val minerals: Minerals,
     val createdEpochSeconds: Long,
     val updatedEpochSeconds: Long,
+    @Embedded(prefix = "eaten_") val eatingTime: EatingTime? = null,
 )

@@ -79,6 +79,7 @@ class UnpackFoodDiaryEntryUseCase(
                         food = it.food,
                         createdAt = entry.createdAt,
                         updatedAt = now,
+                        eatingTime = entry.eatingTime,
                     )
 
                 entryRepository.insert(
@@ -87,6 +88,7 @@ class UnpackFoodDiaryEntryUseCase(
                     measurement = entry.measurement,
                     food = entry.food,
                     createdAt = entry.createdAt,
+                    eatingTime = entry.eatingTime,
                 )
             }
 

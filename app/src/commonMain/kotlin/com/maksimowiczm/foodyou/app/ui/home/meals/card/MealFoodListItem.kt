@@ -104,7 +104,10 @@ internal fun MealFoodListItem(
             fats = { Text(text = fatsString, style = MaterialTheme.typography.bodySmall) },
             calories = { Text(text = caloriesString, style = MaterialTheme.typography.bodySmall) },
             measurement = {
-                Text(text = measurementString, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = listOfNotNull(measurementString, entry.timeDescription()).joinToString(" · "),
+                    style = MaterialTheme.typography.bodySmall,
+                )
             },
             isRecipe = entry.isRecipe,
             modifier = modifier,
@@ -166,7 +169,9 @@ internal fun MealFoodListItem(
             },
             fats = { Text(text = fatsString, style = MaterialTheme.typography.bodySmall) },
             calories = { Text(text = caloriesString, style = MaterialTheme.typography.bodySmall) },
-            measurement = {},
+            measurement = {
+                entry.timeDescription()?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+            },
             isRecipe = false,
             modifier = modifier,
             containerColor = color,
@@ -176,3 +181,19 @@ internal fun MealFoodListItem(
         )
     }
 }
+
+private fun MealEntryModel.timeDescription(): String? {
+    val time = eatingTime ?: return null
+    val start = time.fromMinute.clockText()
+    val end = time.toMinute
+    val description = when {
+        end == null -> "Ate at $start"
+        end == time.fromMinute -> "Time approximate (whole day)"
+        else -> "Time approximate ($start–${end.clockText()})"
+    }
+    val logged = createdAt?.let { "Logged ${it.date} ${it.time.toString().take(5)}" }
+    return listOfNotNull(description, logged).joinToString(" · ")
+}
+
+private fun Int.clockText(): String =
+    (this / 60).toString().padStart(2, '0') + ":" + (this % 60).toString().padStart(2, '0')

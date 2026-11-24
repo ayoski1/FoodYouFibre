@@ -90,6 +90,8 @@ private fun DiaryEntry.toMealEntryModel(): MealEntryModel =
                 proteins = nutritionFacts.proteins.value,
                 carbohydrates = nutritionFacts.carbohydrates.value,
                 fats = nutritionFacts.fats.value,
+                eatingTime = eatingTime,
+                createdAt = createdAt,
                 measurement = measurement,
                 weight = weight,
                 isLiquid = food.isLiquid,
@@ -106,5 +108,7 @@ private fun DiaryEntry.toMealEntryModel(): MealEntryModel =
                 proteins = nutritionFacts.proteins.value,
                 carbohydrates = nutritionFacts.carbohydrates.value,
                 fats = nutritionFacts.fats.value,
+                eatingTime = eatingTime,
+                createdAt = createdAt,
             )
     }

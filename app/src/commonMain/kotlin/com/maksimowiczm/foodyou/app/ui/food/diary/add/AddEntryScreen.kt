@@ -44,6 +44,7 @@ import com.maksimowiczm.foodyou.app.ui.common.component.ArrowBackIconButton
 import com.maksimowiczm.foodyou.app.ui.food.component.MeasurementPicker
 import com.maksimowiczm.foodyou.app.ui.food.diary.component.ChipsDatePicker
 import com.maksimowiczm.foodyou.app.ui.food.diary.component.ChipsMealPicker
+import com.maksimowiczm.foodyou.app.ui.food.diary.component.EatingTimeDialog
 import com.maksimowiczm.foodyou.app.ui.food.diary.component.FoodMeasurementFormState
 import com.maksimowiczm.foodyou.app.ui.food.diary.component.Source
 import com.maksimowiczm.foodyou.app.ui.food.diary.component.rememberFoodMeasurementFormState
@@ -135,36 +136,28 @@ fun AddEntryScreen(
                 selectedMeasurement = selectedMeasurement,
             )
 
+        var pending by rememberSaveable { mutableStateOf<String?>(null) }
+        val selectedMeal = meals.firstOrNull { it.name == state.mealsState.selectedMeal }
+        if (pending != null && selectedMeal != null) {
+            EatingTimeDialog(
+                date = state.dateState.selectedDate,
+                meal = selectedMeal,
+                onDismiss = { pending = null },
+                onSave = { time ->
+                    val unpack = pending == "unpack"
+                    pending = null
+                    val measurement = state.measurementState.measurement
+                    val date = state.dateState.selectedDate
+                    if (unpack) viewModel.unpack(measurement, selectedMeal.id, date, time)
+                    else viewModel.addEntry(measurement, selectedMeal.id, date, time)
+                },
+            )
+        }
+
         AddEntryScreen(
             onBack = onBack,
-            onAdd = {
-                val selectedMealId =
-                    state.mealsState.selectedMeal?.let { mealName ->
-                        meals.firstOrNull { it.name == mealName }?.id
-                    }
-
-                if (selectedMealId != null) {
-                    viewModel.addEntry(
-                        measurement = state.measurementState.measurement,
-                        mealId = selectedMealId,
-                        date = state.dateState.selectedDate,
-                    )
-                }
-            },
-            onUnpack = {
-                val selectedMealId =
-                    state.mealsState.selectedMeal?.let { mealName ->
-                        meals.firstOrNull { it.name == mealName }?.id
-                    }
-
-                if (selectedMealId != null) {
-                    viewModel.unpack(
-                        measurement = state.measurementState.measurement,
-                        mealId = selectedMealId,
-                        date = state.dateState.selectedDate,
-                    )
-                }
-            },
+            onAdd = { if (selectedMeal != null) pending = "add" },
+            onUnpack = { if (selectedMeal != null) pending = "unpack" },
             onEditFood = onEditFood,
             onDelete = viewModel::deleteFood,
             onIngredient = onIngredient,
