@@ -29,6 +29,8 @@ internal fun NutrientsColors(
     onCarbsColorChange: (Color) -> Unit,
     fatsColor: Color,
     onFatsColorChange: (Color) -> Unit,
+    fibreColor: Color,
+    onFibreColorChange: (Color) -> Unit,
     onReset: () -> Unit,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
@@ -66,6 +68,18 @@ internal fun NutrientsColors(
                 fatsDialog = false
             },
             onDismissRequest = { fatsDialog = false },
+        )
+    }
+
+    var fibreDialog by rememberSaveable { mutableStateOf(false) }
+    if (fibreDialog) {
+        ColorPickerDialog(
+            initialColor = fibreColor,
+            onConfirm = {
+                onFibreColorChange(it)
+                fibreDialog = false
+            },
+            onDismissRequest = { fibreDialog = false },
         )
     }
 
@@ -118,6 +132,16 @@ internal fun NutrientsColors(
                 }
             },
             supportingContent = { Text(fatsColor.value.toColorString()) },
+        )
+        ListItem(
+            headlineContent = { Text(stringResource(Res.string.fibre_summary_title)) },
+            modifier = Modifier.clickable { fibreDialog = true },
+            leadingContent = {
+                Canvas(Modifier.size(24.dp).clip(MaterialTheme.shapes.small)) {
+                    drawRect(fibreColor)
+                }
+            },
+            supportingContent = { Text(fibreColor.value.toColorString()) },
         )
         ListItem(
             headlineContent = { Text(stringResource(Res.string.headline_reset_to_default)) },

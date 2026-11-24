@@ -288,7 +288,7 @@ private fun FibreSummary(model: DaySummaryModel) {
     fun amount(value: Double?, complete: Boolean): String =
         value?.let { it.formatClipZeros() + " g" + if (complete) "" else "+" }
             ?: "—"
-    val color = MaterialTheme.colorScheme.primary
+    val color = LocalNutrientsPalette.current.fibreOnSurfaceContainer
     val fraction = model.dietaryFiber?.let { known ->
         val goal = model.dietaryFiberGoal
         if (goal > 0) (known / goal).toFloat().coerceIn(0f, 1f) else 0f
@@ -311,14 +311,17 @@ private fun FibreSummary(model: DaySummaryModel) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     stringResource(Res.string.fibre_summary_title),
+                    color = color,
                     style = MaterialTheme.typography.labelSmall,
                 )
                 Text(
                     amount(model.dietaryFiber, model.dietaryFiberComplete),
+                    color = color,
                     style = MaterialTheme.typography.labelMedium,
                 )
                 Text(
                     "/ " + model.dietaryFiberGoal.formatClipZeros() + " g",
+                    color = color,
                     style = MaterialTheme.typography.labelSmall,
                 )
             }

@@ -31,4 +31,5 @@ internal fun NutrientsPalette.applyColors(nutrientsColors: NutrientsColors?) =
         carbohydratesOnSurfaceContainer =
             nutrientsColors?.carbohydrates?.let(::Color) ?: carbohydratesOnSurfaceContainer,
         fatsOnSurfaceContainer = nutrientsColors?.fats?.let(::Color) ?: fatsOnSurfaceContainer,
+        fibreOnSurfaceContainer = nutrientsColors?.fibre?.let(::Color) ?: fibreOnSurfaceContainer,
     )

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -18,8 +19,10 @@ import com.maksimowiczm.foodyou.app.ui.common.theme.LocalNutrientsPalette
 import com.maksimowiczm.foodyou.common.compose.extension.plus
 import com.maksimowiczm.foodyou.theme.NutrientsColors
 import com.maksimowiczm.foodyou.theme.Theme
+import com.maksimowiczm.foodyou.theme.ThemeContrast
 import com.maksimowiczm.foodyou.theme.ThemeOption
 import com.maksimowiczm.foodyou.theme.ThemeSettings
+import com.maksimowiczm.foodyou.theme.ThemeStyle
 import foodyou.app.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 
@@ -70,6 +73,14 @@ internal fun ThemeScreenContent(
             )
         }
         item {
+            FilterChip(
+                selected = themeSettings.theme == WarmOrangeTheme,
+                onClick = { onUpdateTheme(WarmOrangeTheme) },
+                label = { Text(stringResource(Res.string.palette_warm_orange)) },
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+        }
+        item {
             AdditionalSettings(
                 themeSettings = themeSettings,
                 onRandomizeTheme = onRandomizeTheme,
@@ -102,6 +113,10 @@ internal fun ThemeScreenContent(
                 onFatsColorChange = { newColor ->
                     onNutrientsColorsChange(nutrientsColors.copy(fats = newColor.value))
                 },
+                fibreColor = nutrientsPalette.fibreOnSurfaceContainer,
+                onFibreColorChange = { newColor ->
+                    onNutrientsColorsChange(nutrientsColors.copy(fibre = newColor.value))
+                },
                 onReset = {
                     onNutrientsColorsChange(
                         NutrientsColors(proteins = null, carbohydrates = null, fats = null)
@@ -113,3 +128,10 @@ internal fun ThemeScreenContent(
         }
     }
 }
+
+private val WarmOrangeTheme = Theme.Custom(
+    seedColor = Color(0xFFB66100).value,
+    style = ThemeStyle.Vibrant,
+    contrast = ThemeContrast.Default,
+    isAmoled = false,
+)

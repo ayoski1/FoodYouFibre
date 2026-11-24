@@ -19,7 +19,7 @@ buildConfig {
     packageName("com.maksimowiczm.foodyou.app")
     className("BuildConfig")
 
-    val versionName = libs.versions.version.name.get() + "-fibre.4"
+    val versionName = libs.versions.version.name.get() + "-fibre.5"
     buildConfigField("String", "VERSION_NAME", "\"$versionName\"")
 }
 
@@ -129,8 +129,8 @@ android {
         applicationId = "com.maksimowiczm.foodyou.fibre"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = libs.versions.android.versionCode.get().toInt() + 3
-        versionName = libs.versions.version.name.get() + "-fibre.4"
+        versionCode = libs.versions.android.versionCode.get().toInt() + 4
+        versionName = libs.versions.version.name.get() + "-fibre.5"
 
         manifestPlaceholders["applicationIcon"] = "@mipmap/ic_launcher"
         manifestPlaceholders["applicationRoundIcon"] = "@mipmap/ic_launcher_round"

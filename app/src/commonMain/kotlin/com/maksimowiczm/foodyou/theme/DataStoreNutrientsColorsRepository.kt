@@ -14,6 +14,7 @@ internal class DataStoreNutrientsColorsRepository(dataStore: DataStore<Preferenc
             proteins = this[NutrientsColorsPreferencesKeys.proteinsColor]?.toULong(),
             carbohydrates = this[NutrientsColorsPreferencesKeys.carbohydratesColor]?.toULong(),
             fats = this[NutrientsColorsPreferencesKeys.fatsColor]?.toULong(),
+            fibre = this[NutrientsColorsPreferencesKeys.fibreColor]?.toULong(),
         )
     }
 
@@ -21,6 +22,7 @@ internal class DataStoreNutrientsColorsRepository(dataStore: DataStore<Preferenc
         this[NutrientsColorsPreferencesKeys.proteinsColor] = updated.proteins?.toLong()
         this[NutrientsColorsPreferencesKeys.carbohydratesColor] = updated.carbohydrates?.toLong()
         this[NutrientsColorsPreferencesKeys.fatsColor] = updated.fats?.toLong()
+        this[NutrientsColorsPreferencesKeys.fibreColor] = updated.fibre?.toLong()
     }
 }
 
@@ -28,4 +30,5 @@ private object NutrientsColorsPreferencesKeys {
     val proteinsColor = longPreferencesKey("nutrientsColors:proteins")
     val carbohydratesColor = longPreferencesKey("nutrientsColors:carbohydrates")
     val fatsColor = longPreferencesKey("nutrientsColors:fats")
+    val fibreColor = longPreferencesKey("nutrientsColors:fibre")
 }
