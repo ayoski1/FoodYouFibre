@@ -5,13 +5,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
-import com.maksimowiczm.foodyou.common.compose.utility.formatClipZeros
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -21,8 +18,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +31,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.maksimowiczm.foodyou.app.ui.common.theme.LocalNutrientsPalette
@@ -40,6 +40,7 @@ import com.maksimowiczm.foodyou.app.ui.common.utility.LocalNutrientsOrder
 import com.maksimowiczm.foodyou.app.ui.home.shared.FoodYouHomeCard
 import com.maksimowiczm.foodyou.app.ui.home.shared.HomeState
 import com.maksimowiczm.foodyou.common.compose.extension.toDp
+import com.maksimowiczm.foodyou.common.compose.utility.formatClipZeros
 import com.maksimowiczm.foodyou.settings.domain.entity.NutrientsOrder
 import com.valentinilk.shimmer.Shimmer
 import com.valentinilk.shimmer.shimmer
@@ -105,21 +106,21 @@ internal fun GoalsCard(
 ) {
     val proteinsPercentage =
         animateFloatAsState(
-                targetValue = proteins.toFloat() / proteinsGoal,
+                targetValue = if (proteinsGoal > 0) proteins.toFloat() / proteinsGoal else 0f,
                 animationSpec = MaterialTheme.motionScheme.slowEffectsSpec(),
             )
             .value
 
     val carbsPercentage =
         animateFloatAsState(
-                targetValue = carbohydrates.toFloat() / carbohydratesGoal,
+                targetValue = if (carbohydratesGoal > 0) carbohydrates.toFloat() / carbohydratesGoal else 0f,
                 animationSpec = MaterialTheme.motionScheme.slowEffectsSpec(),
             )
             .value
 
     val fatsPercentage =
         animateFloatAsState(
-                targetValue = fats.toFloat() / fatsGoal,
+                targetValue = if (fatsGoal > 0) fats.toFloat() / fatsGoal else 0f,
                 animationSpec = MaterialTheme.motionScheme.slowEffectsSpec(),
             )
             .value
@@ -201,12 +202,15 @@ private fun GoalsCardContent(
 
     val left = remember(energy, energyGoal) { energyGoal - energy }
 
-    FlowRow(
+    Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Text(text = caloriesString, style = typography.headlineLargeEmphasized)
 
             when {
@@ -233,8 +237,14 @@ private fun GoalsCardContent(
             }
         }
 
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(modifier = Modifier.height(64.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Row(
+                modifier = Modifier.height(64.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
                 nutrientsOrder.forEach { field ->
                     when (field) {
                         NutrientsOrder.Proteins ->
@@ -278,11 +288,40 @@ private fun FibreSummary(model: DaySummaryModel) {
     fun amount(value: Double?, complete: Boolean): String =
         value?.let { it.formatClipZeros() + " g" + if (complete) "" else "+" }
             ?: "—"
-    TextButton(onClick = { showDetails = true }) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(stringResource(Res.string.fibre_summary_title), style = MaterialTheme.typography.labelSmall)
-            Text(amount(model.dietaryFiber, model.dietaryFiberComplete), style = MaterialTheme.typography.labelLarge)
-            Text("/ " + model.dietaryFiberGoal.formatClipZeros() + " g", style = MaterialTheme.typography.labelSmall)
+    val color = MaterialTheme.colorScheme.primary
+    val fraction = model.dietaryFiber?.let { known ->
+        val goal = model.dietaryFiberGoal
+        if (goal > 0) (known / goal).toFloat().coerceIn(0f, 1f) else 0f
+    } ?: 0f
+    TextButton(
+        onClick = { showDetails = true },
+        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp),
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            MacroBar(
+                progress = fraction,
+                containerColor = color.copy(alpha = .25f),
+                barColor = color,
+                modifier = Modifier.height(36.dp),
+                barWidth = 9.dp,
+            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    stringResource(Res.string.fibre_summary_title),
+                    style = MaterialTheme.typography.labelSmall,
+                )
+                Text(
+                    amount(model.dietaryFiber, model.dietaryFiberComplete),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                Text(
+                    "/ " + model.dietaryFiberGoal.formatClipZeros() + " g",
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            }
         }
     }
     if (showDetails) AlertDialog(
@@ -300,56 +339,41 @@ private fun FibreSummary(model: DaySummaryModel) {
     )
 }
 
+internal data class MacroBarFractions(val withinTarget: Float, val aboveTarget: Float)
+
+internal fun macroBarFractions(progress: Float): MacroBarFractions = when {
+    !progress.isFinite() || progress <= 0f -> MacroBarFractions(0f, 0f)
+    progress <= 1f -> MacroBarFractions(progress, 0f)
+    else -> MacroBarFractions(1f / progress, 1f - 1f / progress)
+}
+
 @Composable
 private fun MacroBar(
     progress: Float,
     containerColor: Color,
     barColor: Color,
     modifier: Modifier = Modifier,
+    barWidth: Dp = 20.dp,
     overflowColor: Color = MaterialTheme.colorScheme.error,
 ) {
-    val containerFraction = (1 - progress).coerceIn(0f, 1f)
-    val overflowFraction = (progress - 1).coerceIn(0f, 1f)
-
+    val fractions = macroBarFractions(progress)
     Canvas(
-        modifier =
-            modifier
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 8.dp,
-                        topEnd = 8.dp,
-                        bottomStart = 4.dp,
-                        bottomEnd = 4.dp,
-                    )
-                )
-                .fillMaxHeight()
-                .width(24.dp)
+        modifier = modifier
+            .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomStart = 4.dp, bottomEnd = 4.dp))
+            .fillMaxHeight()
+            .width(barWidth),
     ) {
-        if (overflowFraction > 0f) {
-            val barHeight = 1 - overflowFraction
-
-            drawRect(
-                color = barColor,
-                size = Size(width = size.width, height = size.height * barHeight - 1.dp.toPx()),
-            )
-            drawRect(
-                color = overflowColor,
-                topLeft = Offset(x = 0f, y = size.height * barHeight + 1.dp.toPx()),
-                size =
-                    Size(width = size.width, height = size.height * overflowFraction - 1.dp.toPx()),
-            )
-        } else {
-            drawRect(
-                color = containerColor,
-                size =
-                    Size(width = size.width, height = size.height * containerFraction - 1.dp.toPx()),
-            )
-            drawRect(
-                color = barColor,
-                topLeft = Offset(x = 0f, y = size.height * containerFraction + 1.dp.toPx()),
-                size = Size(width = size.width, height = size.height * progress - 1.dp.toPx()),
-            )
-        }
+        val withinHeight = fractions.withinTarget * size.height
+        val capHeight = fractions.aboveTarget * size.height
+        val boundary = size.height - withinHeight
+        val topColor = if (capHeight > 0f) overflowColor else containerColor
+        val gap = minOf(1.dp.toPx(), boundary / 2f, withinHeight / 2f)
+        drawRect(topColor, size = Size(size.width, boundary - gap))
+        drawRect(
+            color = barColor,
+            topLeft = Offset(0f, boundary + gap),
+            size = Size(size.width, withinHeight - gap),
+        )
     }
 }
 
