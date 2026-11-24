@@ -49,7 +49,7 @@ internal class ImportCsvProductUseCaseImpl(
         source: FoodSource.Type,
         skipHeader: Boolean,
     ): Flow<Int> = channelFlow {
-        var count = 1
+        var count = 0
         transactionProvider.withTransaction {
             csvParser
                 .parse(stream)
@@ -58,8 +58,8 @@ internal class ImportCsvProductUseCaseImpl(
                     if (skipHeader) it.drop(1) else it
                 }
                 .collect { line ->
-                    processLine(mapper = mapper, source = source, line = line)
-                    send(count++)
+                    if (processLine(mapper = mapper, source = source, line = line)) count++
+                    send(count)
                 }
         }
     }
@@ -68,7 +68,7 @@ internal class ImportCsvProductUseCaseImpl(
         mapper: List<ProductField?>,
         source: FoodSource.Type,
         line: List<String?>,
-    ) {
+    ): Boolean {
         if (line.size != mapper.size) {
             error("Invalid number of columns in CSV line: $line")
         }
@@ -188,6 +188,7 @@ internal class ImportCsvProductUseCaseImpl(
                 FoodHistory.Imported(timestamp = dateProvider.nowInstant()),
             )
         }
+        return id != null
     }
 }
 

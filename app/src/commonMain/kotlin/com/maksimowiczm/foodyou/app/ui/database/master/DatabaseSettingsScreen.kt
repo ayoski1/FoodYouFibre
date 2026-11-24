@@ -25,6 +25,7 @@ fun DatabaseSettingsScreen(
     onBack: () -> Unit,
     onExternalDatabases: () -> Unit,
     onImportCsvProducts: () -> Unit,
+    onImportLatestCsv: () -> Unit,
     onExportCsvProducts: () -> Unit,
     onDatabaseBackup: () -> Unit,
     modifier: Modifier = Modifier,
@@ -46,6 +47,13 @@ fun DatabaseSettingsScreen(
             contentPadding = paddingValues,
         ) {
             item { ExternalDatabasesSettingsListItem(onExternalDatabases) }
+            item {
+                SettingsListItem(
+                    icon = { Icon(Icons.Outlined.FileOpen, null) },
+                    label = { Text("Import latest Food You CSV") },
+                    onClick = onImportLatestCsv,
+                )
+            }
             item { ImportCsvProductsSettingsListItem(onImportCsvProducts) }
             item { ExportCsvProductsSettingsListItem(onExportCsvProducts) }
             item { DatabaseBackup(onDatabaseBackup) }

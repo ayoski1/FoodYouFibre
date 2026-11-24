@@ -46,6 +46,7 @@ expect fun ImportCsvProductsScreen(
     onBack: () -> Unit,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier,
+    latest: Boolean = false,
 )
 
 @Composable

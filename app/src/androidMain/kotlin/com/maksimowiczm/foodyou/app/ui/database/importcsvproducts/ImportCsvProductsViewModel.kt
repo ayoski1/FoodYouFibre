@@ -9,6 +9,7 @@ import com.maksimowiczm.foodyou.common.domain.food.FoodSource
 import com.maksimowiczm.foodyou.common.log.Logger
 import com.maksimowiczm.foodyou.importexport.domain.entity.ProductField
 import com.maksimowiczm.foodyou.importexport.domain.usecase.ImportCsvProductUseCase
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -16,8 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -33,20 +33,84 @@ internal class ImportCsvProductsViewModel(
 
     private var fileContent: ByteArray? = null
 
-    fun handleCsv(uri: Uri, context: Context) {
+    fun importLatest(context: Context, selectedFolder: Uri? = null) {
+        if (_uiState.value is UiState.Importing) return
+        _uiState.value = UiState.Importing(0)
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val stream = context.contentResolver.openInputStream(uri)
-                if (stream == null) {
-                    _uiState.value =
-                        UiState.FailedToOpenFile(
-                            "Failed to open file. Please ensure the file exists and is accessible."
-                        )
+                val inbox = LatestFoodYouCsv(context)
+                if (selectedFolder != null) inbox.setFolder(selectedFolder)
+                val folder = inbox.folder()
+                if (folder == null) {
+                    _uiState.value = UiState.ChooseFolder
                     return@launch
                 }
 
-                val content = stream.use { it.readBytes() }
-                val header = csvParser.parse(content.toList().asFlow()).first()
+                val file = inbox.newest(folder)
+                if (file == null) {
+                    _uiState.value = UiState.LatestResult(
+                        "No FoodYou-*.csv files found in the import folder."
+                    )
+                    return@launch
+                }
+
+                val content = readCsv(file.uri, context, limit = 2 * 1024 * 1024)
+                val digest = LatestFoodYouCsv.digest(content)
+                if (inbox.wasImported(digest)) {
+                    _uiState.value = UiState.LatestResult("${file.name} was already imported.")
+                    return@launch
+                }
+
+                val stream = content.toList().asFlow()
+                val mapper = foodYouCsvMapping(csvParser, stream, file.name)
+
+                val count = importCsvProducts(stream, mapper)
+                inbox.rememberImport(digest)
+                _uiState.value = UiState.LatestResult(
+                    "${file.name}\n$count ${if (count == 1) "product" else "products"} added."
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: SecurityException) {
+                _uiState.value = UiState.LatestResult("Choose the import folder again to restore access.")
+            } catch (e: Exception) {
+                logger.w(TAG, e) { "Could not import latest Food You CSV" }
+                _uiState.value = UiState.LatestResult(e.message ?: "Could not import the latest CSV.")
+            }
+        }
+    }
+
+    private fun readCsv(uri: Uri, context: Context, limit: Int? = null): ByteArray {
+        val stream = context.contentResolver.openInputStream(uri)
+            ?: throw IOException("Could not open the CSV file.")
+        val bytes = stream.use { input ->
+            if (limit == null) input.readBytes() else {
+                val output = ByteArrayOutputStream()
+                val buffer = ByteArray(8192)
+                while (true) {
+                    val size = input.read(buffer)
+                    if (size < 0) break
+                    if (output.size() + size > limit) {
+                        throw IOException("CSV is too large for quick import. Use manual CSV import.")
+                    }
+                    output.write(buffer, 0, size)
+                }
+                output.toByteArray()
+            }
+        }
+        val bom = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte())
+        return if (bytes.size >= bom.size && bom.indices.all { bytes[it] == bom[it] }) {
+            bytes.copyOfRange(bom.size, bytes.size)
+        } else {
+            bytes
+        }
+    }
+
+    fun handleCsv(uri: Uri, context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val content = readCsv(uri, context)
+                val header = csvParser.parse(content.toList().asFlow()).firstOrNull().orEmpty()
 
                 if (header.isEmpty() || header.any { it == null }) {
                     _uiState.value =
@@ -69,10 +133,10 @@ internal class ImportCsvProductsViewModel(
             return
         }
 
-        if (requiredKeys.any { it !in fieldMap }) {
+        if (requiredCsvFields.any { it !in fieldMap }) {
             _uiState.value =
                 UiState.MissingRequiredFields(
-                    "Missing required fields: ${requiredKeys.joinToString(", ")}. Please ensure all required fields are mapped."
+                    "Missing required fields: ${requiredCsvFields.joinToString(", ")}. Please ensure all required fields are mapped."
                 )
             return
         }
@@ -96,7 +160,8 @@ internal class ImportCsvProductsViewModel(
 
         viewModelScope.launch {
             try {
-                importCsvProducts(fileContent.toList().asFlow(), mapper)
+                val count = importCsvProducts(fileContent.toList().asFlow(), mapper)
+                _uiState.value = UiState.ImportSuccess(count)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: IOException) {
@@ -111,7 +176,7 @@ internal class ImportCsvProductsViewModel(
         }
     }
 
-    private suspend fun importCsvProducts(stream: Flow<Byte>, mapper: List<ProductField?>) {
+    private suspend fun importCsvProducts(stream: Flow<Byte>, mapper: List<ProductField?>): Int =
         importCsvProductUseCase
             .import(
                 mapper = mapper,
@@ -119,23 +184,10 @@ internal class ImportCsvProductsViewModel(
                 source = FoodSource.Type.User,
                 skipHeader = true,
             )
-            .catch { throw it }
             .onEach { _uiState.value = UiState.Importing(it) }
             .last()
-            .let { _uiState.value = UiState.ImportSuccess(it) }
-    }
 
     private companion object {
         private const val TAG = "ImportCsvProductsViewModel"
-
-        private val requiredKeys by lazy {
-            setOf(
-                ProductField.Name,
-                ProductField.Energy,
-                ProductField.Proteins,
-                ProductField.Carbohydrates,
-                ProductField.Fats,
-            )
-        }
     }
 }

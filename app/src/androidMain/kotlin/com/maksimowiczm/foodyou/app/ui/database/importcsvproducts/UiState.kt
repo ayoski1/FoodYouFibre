@@ -11,6 +11,10 @@ internal sealed interface UiState {
 
     @Immutable data object WaitingForFile : UiState
 
+    @Immutable data object ChooseFolder : UiState
+
+    @Immutable data class LatestResult(val message: String) : UiState
+
     @Immutable data class FileOpened(val header: List<String>) : UiState
 
     @Immutable data class FailedToOpenFile(override val message: String?) : WithError

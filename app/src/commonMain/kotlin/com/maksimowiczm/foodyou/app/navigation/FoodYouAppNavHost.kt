@@ -125,6 +125,7 @@ fun FoodYouAppNavHost(onDatabaseBackup: () -> Unit, modifier: Modifier = Modifie
                 onBack = { navController.popBackStackInclusive<DatabaseSettings>() },
                 onExternalDatabases = { navController.navigateSingleTop(ExternalDatabases) },
                 onImportCsvProducts = { navController.navigateSingleTop(ImportCsvProducts) },
+                onImportLatestCsv = { navController.navigateSingleTop(ImportLatestCsv) },
                 onExportCsvProducts = { navController.navigateSingleTop(ExportCsvProducts) },
                 onDatabaseBackup = onDatabaseBackup,
             )
@@ -146,6 +147,13 @@ fun FoodYouAppNavHost(onDatabaseBackup: () -> Unit, modifier: Modifier = Modifie
             ImportCsvProductsScreen(
                 onBack = { navController.popBackStackInclusive<ImportCsvProducts>() },
                 onFinish = { navController.popBackStackInclusive<ImportCsvProducts>() },
+            )
+        }
+        forwardBackwardComposable<ImportLatestCsv> {
+            ImportCsvProductsScreen(
+                onBack = { navController.popBackStackInclusive<ImportLatestCsv>() },
+                onFinish = { navController.popBackStackInclusive<ImportLatestCsv>() },
+                latest = true,
             )
         }
         forwardBackwardComposable<ExportCsvProducts> {
@@ -411,6 +419,8 @@ fun FoodYouAppNavHost(onDatabaseBackup: () -> Unit, modifier: Modifier = Modifie
 @Serializable private object OpenFoodFactsLogin
 
 @Serializable private object ImportCsvProducts
+
+@Serializable private object ImportLatestCsv
 
 @Serializable private object ExportCsvProducts
 
