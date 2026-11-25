@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -100,6 +101,16 @@ internal fun ThemeScreenContent(
             val fatsColor =
                 nutrientsColors.fats?.let(::Color) ?: nutrientsPalette.fatsOnSurfaceContainer
 
+            TextButton(
+                onClick = {
+                    onNutrientsColorsChange(
+                        nutrientsColors.copy(proteins = null, carbohydrates = null, fats = null)
+                    )
+                },
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) {
+                Text(stringResource(Res.string.restore_bright_macro_colors))
+            }
             NutrientsColors(
                 proteinsColor = proteinsColor,
                 onProteinsColorChange = { newColor ->

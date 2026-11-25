@@ -219,7 +219,10 @@ private fun NutrientList(
             when (it) {
                 NutrientsOrder.Proteins -> Proteins(nutritionFacts, goals)
                 NutrientsOrder.Fats -> Fats(nutritionFacts, goals)
-                NutrientsOrder.Carbohydrates -> Carbohydrates(nutritionFacts, goals)
+                NutrientsOrder.Carbohydrates -> {
+                    Carbohydrates(nutritionFacts, goals)
+                    Fibre(nutritionFacts, goals)
+                }
                 NutrientsOrder.Other -> Other(nutritionFacts, goals)
                 NutrientsOrder.Vitamins -> Vitamins(nutritionFacts, goals)
                 NutrientsOrder.Minerals -> Minerals(nutritionFacts, goals)
@@ -311,6 +314,7 @@ private fun Carbohydrates(
             field = NutritionFactsField.Carbohydrates,
             value = nutritionFacts.carbohydrates,
             target = goals[NutritionFactsField.Carbohydrates],
+            label = stringResource(Res.string.fibre_carbohydrate_label),
             modifier = Modifier.fillMaxWidth(),
             color = nutrientsPalette.carbohydratesOnSurfaceContainer,
         )
@@ -326,23 +330,41 @@ private fun Carbohydrates(
             target = goals[NutritionFactsField.AddedSugars],
             modifier = Modifier.fillMaxWidth(),
         )
+    }
+}
+
+@Composable
+private fun Fibre(nutritionFacts: NutritionFacts, goals: DailyGoal) {
+    val colour = LocalNutrientsPalette.current.fibreOnSurfaceContainer
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         NutrientGoal(
             field = NutritionFactsField.DietaryFiber,
+            label = stringResource(Res.string.fibre_summary_title),
             value = nutritionFacts.dietaryFiber,
             target = goals[NutritionFactsField.DietaryFiber],
             modifier = Modifier.fillMaxWidth(),
+            color = colour,
+            highlightExcess = false,
         )
         NutrientGoal(
             field = NutritionFactsField.SolubleFiber,
             value = nutritionFacts.solubleFiber,
             target = goals[NutritionFactsField.SolubleFiber],
             modifier = Modifier.fillMaxWidth(),
+            color = colour,
+            highlightExcess = false,
         )
         NutrientGoal(
             field = NutritionFactsField.InsolubleFiber,
             value = nutritionFacts.insolubleFiber,
             target = goals[NutritionFactsField.InsolubleFiber],
             modifier = Modifier.fillMaxWidth(),
+            color = colour,
+            highlightExcess = false,
+        )
+        Text(
+            stringResource(Res.string.fibre_details_explanation),
+            style = MaterialTheme.typography.bodySmall,
         )
     }
 }

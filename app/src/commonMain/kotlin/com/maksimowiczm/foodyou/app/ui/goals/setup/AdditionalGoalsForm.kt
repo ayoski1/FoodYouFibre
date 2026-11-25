@@ -24,6 +24,7 @@ import com.maksimowiczm.foodyou.common.compose.utility.formatClipZeros
 import com.maksimowiczm.foodyou.common.domain.food.NutritionFactsField
 import com.maksimowiczm.foodyou.goals.domain.entity.DailyGoal
 import com.maksimowiczm.foodyou.settings.domain.entity.NutrientsOrder
+import com.maksimowiczm.foodyou.app.ui.common.theme.LocalNutrientsPalette
 import foodyou.app.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 
@@ -36,7 +37,10 @@ internal fun AdditionalGoalsForm(state: AdditionalGoalsFormState, modifier: Modi
             when (it) {
                 NutrientsOrder.Proteins -> Unit
                 NutrientsOrder.Fats -> Fats(state)
-                NutrientsOrder.Carbohydrates -> Carbohydrates(state)
+                NutrientsOrder.Carbohydrates -> {
+                    Carbohydrates(state)
+                    Fibre(state)
+                }
                 NutrientsOrder.Other -> Other(state)
                 NutrientsOrder.Vitamins -> Vitamins(state)
                 NutrientsOrder.Minerals -> Minerals(state)
@@ -95,6 +99,16 @@ private fun ColumnScope.Carbohydrates(state: AdditionalGoalsFormState) {
     state.addedSugars.TextField(
         label = stringResource(Res.string.nutriment_added_sugars),
         modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun ColumnScope.Fibre(state: AdditionalGoalsFormState) {
+    Text(
+        text = stringResource(Res.string.fibre_summary_title),
+        modifier = Modifier.padding(top = 8.dp),
+        style = MaterialTheme.typography.labelLarge,
+        color = LocalNutrientsPalette.current.fibreOnSurfaceContainer,
     )
     state.dietaryFiber.TextField(
         label = stringResource(Res.string.nutriment_fiber),

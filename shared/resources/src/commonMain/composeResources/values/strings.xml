@@ -536,6 +536,8 @@
     <string name="fibre_total">Total recorded</string>
     <string name="fibre_soluble">Soluble</string>
     <string name="fibre_insoluble">Insoluble</string>
+    <string name="restore_bright_macro_colors">Restore bright macro colors</string>
+    <string name="fibre_details_explanation">Fibre is tracked separately. * marks incomplete nutrient data.</string>
     <string name="fibre_close">Close</string>
     <string name="fibre_summary_explanation">+ means some foods have missing values. — means unknown. Soluble and insoluble fibre are parts of total fibre, not additional amounts. Their calorie contribution cannot be inferred from solubility alone.</string>
     <string name="fibre_energy_missing">Calculated estimate. Fibre is missing, so its energy is not included. Carbohydrate must exclude fibre.</string>

@@ -53,6 +53,7 @@ import com.maksimowiczm.foodyou.common.compose.component.unorderedList
 import com.maksimowiczm.foodyou.common.domain.food.FoodSource
 import com.maksimowiczm.foodyou.common.domain.measurement.Measurement
 import com.maksimowiczm.foodyou.settings.domain.entity.NutrientsOrder
+import com.maksimowiczm.foodyou.app.ui.common.theme.LocalNutrientsPalette
 import foodyou.app.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -136,7 +137,10 @@ internal fun ProductForm(
         order.forEach { field ->
             when (field) {
                 NutrientsOrder.Proteins -> Unit
-                NutrientsOrder.Carbohydrates -> Carbohydrates(state, horizontalPadding)
+                NutrientsOrder.Carbohydrates -> {
+                    Carbohydrates(state, horizontalPadding)
+                    Fibre(state, horizontalPadding)
+                }
                 NutrientsOrder.Fats -> Fats(state, horizontalPadding)
                 NutrientsOrder.Other -> Other(state, horizontalPadding)
                 NutrientsOrder.Vitamins -> Vitamins(state, horizontalPadding)
@@ -314,6 +318,16 @@ private fun Carbohydrates(state: ProductFormState, horizontalPadding: PaddingVal
         modifier = Modifier.padding(horizontalPadding).fillMaxWidth(),
     )
 
+}
+
+@Composable
+private fun Fibre(state: ProductFormState, horizontalPadding: PaddingValues) {
+    Text(
+        text = stringResource(Res.string.fibre_summary_title),
+        modifier = Modifier.padding(top = 8.dp).padding(horizontalPadding).fillMaxWidth(),
+        style = MaterialTheme.typography.labelLarge,
+        color = LocalNutrientsPalette.current.fibreOnSurfaceContainer,
+    )
     state.dietaryFiber.TextField(
         label = stringResource(Res.string.nutriment_fiber),
         modifier = Modifier.padding(horizontalPadding).fillMaxWidth(),

@@ -45,7 +45,10 @@ fun NutrientList(
             when (it) {
                 NutrientsOrder.Proteins -> Proteins(facts, incompleteValue)
                 NutrientsOrder.Fats -> Fats(facts, incompleteValue)
-                NutrientsOrder.Carbohydrates -> Carbohydrates(facts, incompleteValue)
+                NutrientsOrder.Carbohydrates -> {
+                    Carbohydrates(facts, incompleteValue)
+                    Fibre(facts, incompleteValue)
+                }
                 NutrientsOrder.Other -> Other(facts, incompleteValue)
                 NutrientsOrder.Vitamins -> Vitamins(facts, incompleteValue)
                 NutrientsOrder.Minerals -> Minerals(facts, incompleteValue)
@@ -169,7 +172,7 @@ private fun Carbohydrates(
     NutrientGroup(
         title = {
             Nutrient(
-                label = { Text(stringResource(Res.string.nutriment_carbohydrates)) },
+                label = { Text(stringResource(Res.string.fibre_carbohydrate_label)) },
                 value = { NutrientDisplay(facts.carbohydrates, incompleteValue) },
                 modifier = modifier,
                 contentPadding = contentPadding,
@@ -195,23 +198,38 @@ private fun Carbohydrates(
                 value = { NutrientDisplay(facts.addedSugars, incompleteValue) },
             )
         }
-        NutrientGroup(
-            title = {
-                Nutrient(
-                    label = { Text(stringResource(Res.string.nutriment_fiber)) },
-                    value = { NutrientDisplay(facts.dietaryFiber, incompleteValue) },
-                )
-            }
-        ) {
+    }
+}
+
+@Composable
+private fun Fibre(
+    facts: NutritionFacts,
+    incompleteValue: (NutrientValue.Incomplete) -> (@Composable () -> Unit),
+) {
+    NutrientGroup(
+        title = {
             Nutrient(
-                label = { Text(stringResource(Res.string.nutriment_soluble_fiber)) },
-                value = { NutrientDisplay(facts.solubleFiber, incompleteValue) },
-            )
-            Nutrient(
-                label = { Text(stringResource(Res.string.nutriment_insoluble_fiber)) },
-                value = { NutrientDisplay(facts.insolubleFiber, incompleteValue) },
+                label = { Text(stringResource(Res.string.fibre_summary_title)) },
+                value = { NutrientDisplay(facts.dietaryFiber, incompleteValue) },
+                shape = MaterialTheme.shapes.medium,
+                containerColor = LocalNutrientsPalette.current.fibreOnSurfaceContainer.copy(alpha = .25f),
+                contentColor = MaterialTheme.colorScheme.onSurface,
             )
         }
+    ) {
+        Nutrient(
+            label = { Text(stringResource(Res.string.nutriment_soluble_fiber)) },
+            value = { NutrientDisplay(facts.solubleFiber, incompleteValue) },
+        )
+        Nutrient(
+            label = { Text(stringResource(Res.string.nutriment_insoluble_fiber)) },
+            value = { NutrientDisplay(facts.insolubleFiber, incompleteValue) },
+        )
+        Text(
+            stringResource(Res.string.fibre_details_explanation),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(8.dp),
+        )
     }
 }
 

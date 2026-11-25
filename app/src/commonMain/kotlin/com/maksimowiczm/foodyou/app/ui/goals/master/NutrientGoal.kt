@@ -33,9 +33,11 @@ internal fun NutrientGoal(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.secondary,
     suffix: String = stringResource(Res.string.unit_gram_short),
+    label: String = field.stringResource(),
+    highlightExcess: Boolean = true,
 ) {
     NutrientGoal(
-        label = field.stringResource(),
+        label = label,
         target =
             NutrientGoalDefaults.simpleTargetString(
                 value = value,
@@ -46,6 +48,7 @@ internal fun NutrientGoal(
         color = color,
         state = rememberNutrientGoalState(value, target),
         modifier = modifier,
+        highlightExcess = highlightExcess,
     )
 }
 
@@ -56,17 +59,17 @@ internal fun NutrientGoal(
     color: Color,
     state: NutrientGoalState,
     modifier: Modifier = Modifier,
+    highlightExcess: Boolean = true,
 ) {
     NutrientGoal(
         label = {
-            val color = if (state.isExceeded) MaterialTheme.colorScheme.error else color
-
             Text(text = label, style = LocalTextStyle.current.copy(color = color))
         },
         value = { Text(target) },
-        progressColor = color.copy(alpha = .9f),
+        progressColor = color,
         state = state,
         modifier = modifier,
+        highlightExcess = highlightExcess,
     )
 }
 
@@ -77,19 +80,21 @@ internal fun NutrientGoal(
     progressColor: Color,
     state: NutrientGoalState,
     modifier: Modifier = Modifier,
+    highlightExcess: Boolean = true,
 ) {
+    val showExcess = highlightExcess && state.progress > 1f
     val progress by
         animateFloatAsState(
-            targetValue = state.progress % 1,
+            targetValue = if (showExcess) state.progress - 1f else state.progress.coerceAtMost(1f),
             animationSpec = MaterialTheme.motionScheme.slowSpatialSpec(),
         )
     val progressBarColor by
         animateColorAsState(
-            if (state.progress > 1) MaterialTheme.colorScheme.error else progressColor
+            if (showExcess) MaterialTheme.colorScheme.error else progressColor
         )
     val trackColor by
         animateColorAsState(
-            if (state.progress > 1) progressColor.copy(alpha = .75f)
+            if (showExcess) progressColor
             else progressColor.copy(alpha = 0.25f)
         )
 
@@ -114,9 +119,6 @@ internal fun rememberNutrientGoalState(value: NutrientValue, target: Double): Nu
 
 @Immutable
 internal class NutrientGoalState(val value: Double, val target: Double) {
-    val isExceeded: Boolean
-        get() = value > target
-
     val progress: Float
         get() = if (target == 0.0) 0f else (value / target).toFloat().coerceIn(0f, 1.99999f)
 }
@@ -158,7 +160,6 @@ internal object NutrientGoalDefaults {
     ): AnnotatedString {
         val isComplete = value.isComplete
         val value = value.value ?: 0.0
-        val isExceeded = value > target
         val colorScheme = MaterialTheme.colorScheme
         val localStyle = LocalTextStyle.current
 
@@ -169,13 +170,12 @@ internal object NutrientGoalDefaults {
             suffix,
             localStyle,
             colorScheme,
-            isExceeded,
             isComplete,
         ) {
             buildAnnotatedString {
                 withStyle(
                     localStyle
-                        .copy(color = if (isExceeded) colorScheme.error else color)
+                        .copy(color = color)
                         .toSpanStyle()
                 ) {
                     if (!isComplete) {

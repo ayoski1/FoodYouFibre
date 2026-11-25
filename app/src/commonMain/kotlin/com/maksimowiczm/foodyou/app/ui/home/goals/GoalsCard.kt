@@ -397,12 +397,7 @@ private fun ExpandedCardContent(
     val gramShort = stringResource(Res.string.unit_gram_short)
 
     val proteinsString = buildAnnotatedString {
-        val color =
-            if (proteinsGrams > proteinsGoalGrams) {
-                colorScheme.error
-            } else {
-                nutrientsPalette.proteinsOnSurfaceContainer
-            }
+        val color = nutrientsPalette.proteinsOnSurfaceContainer
 
         withStyle(typography.headlineSmall.merge(color).toSpanStyle()) {
             append(" $proteinsGrams ")
@@ -413,12 +408,7 @@ private fun ExpandedCardContent(
     }
 
     val carbohydratesString = buildAnnotatedString {
-        val color =
-            if (carbohydratesGrams > carbohydratesGoalGrams) {
-                colorScheme.error
-            } else {
-                nutrientsPalette.carbohydratesOnSurfaceContainer
-            }
+        val color = nutrientsPalette.carbohydratesOnSurfaceContainer
 
         withStyle(typography.headlineSmall.merge(color).toSpanStyle()) {
             append(" $carbohydratesGrams ")
@@ -429,12 +419,7 @@ private fun ExpandedCardContent(
     }
 
     val fatsString = buildAnnotatedString {
-        val color =
-            if (fatsGrams > fatsGoalGrams) {
-                colorScheme.error
-            } else {
-                nutrientsPalette.fatsOnSurfaceContainer
-            }
+        val color = nutrientsPalette.fatsOnSurfaceContainer
 
         withStyle(typography.headlineSmall.merge(color).toSpanStyle()) { append(" $fatsGrams ") }
         withStyle(typography.bodyMedium.merge(colorScheme.outline).toSpanStyle()) {
